@@ -102,6 +102,10 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.NewPost) 
 	return &post, nil
 }
 
+func (r *mutationResolver) CreateAccount(ctx context.Context, input *model.NewAccount) (model.Account, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) Article(ctx context.Context, id string) (*model.Article, error) {
 	article, ok := r.Resolver.ArticleStore[id]
 	if !ok {
@@ -151,6 +155,18 @@ func (r *queryResolver) Posts(ctx context.Context) ([]*model.Post, error) {
 		posts = append(posts, &post)
 	}
 	return posts, nil
+}
+
+func (r *queryResolver) Account(ctx context.Context, id string) (model.Account, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Accounts(ctx context.Context) ([]model.Account, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) AccountsByProvider(ctx context.Context, provider *string) ([]model.Account, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

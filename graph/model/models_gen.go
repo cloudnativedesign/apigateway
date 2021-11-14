@@ -2,6 +2,16 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
+type Account interface {
+	IsAccount()
+}
+
 type Article struct {
 	ID       string `json:"id"`
 	Title    string `json:"title"`
@@ -16,6 +26,14 @@ type Blog struct {
 	Content  string `json:"content"`
 	Summary  string `json:"summary"`
 	Tags     []*Tag `json:"tags"`
+}
+
+type NewAccount struct {
+	ID               *string `json:"id"`
+	Provider         string  `json:"provider"`
+	ProviderID       string  `json:"providerID"`
+	ProviderUsername string  `json:"providerUsername"`
+	ProviderToken    string  `json:"providerToken"`
 }
 
 type NewArticle struct {
@@ -52,7 +70,64 @@ type Post struct {
 	Tags    []string `json:"tags"`
 }
 
+type SocialMediaAccount struct {
+	ID               string              `json:"id"`
+	Provider         SocialMediaProvider `json:"provider"`
+	ProviderID       string              `json:"providerID"`
+	ProviderUsername string              `json:"providerUsername"`
+	ProviderToken    string              `json:"providerToken"`
+}
+
+func (SocialMediaAccount) IsAccount() {}
+
 type Tag struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+
+type SocialMediaProvider string
+
+const (
+	SocialMediaProviderLinkedin      SocialMediaProvider = "LINKEDIN"
+	SocialMediaProviderTwitter       SocialMediaProvider = "TWITTER"
+	SocialMediaProviderFacebook      SocialMediaProvider = "FACEBOOK"
+	SocialMediaProviderReddit        SocialMediaProvider = "REDDIT"
+	SocialMediaProviderStackoverflow SocialMediaProvider = "STACKOVERFLOW"
+)
+
+var AllSocialMediaProvider = []SocialMediaProvider{
+	SocialMediaProviderLinkedin,
+	SocialMediaProviderTwitter,
+	SocialMediaProviderFacebook,
+	SocialMediaProviderReddit,
+	SocialMediaProviderStackoverflow,
+}
+
+func (e SocialMediaProvider) IsValid() bool {
+	switch e {
+	case SocialMediaProviderLinkedin, SocialMediaProviderTwitter, SocialMediaProviderFacebook, SocialMediaProviderReddit, SocialMediaProviderStackoverflow:
+		return true
+	}
+	return false
+}
+
+func (e SocialMediaProvider) String() string {
+	return string(e)
+}
+
+func (e *SocialMediaProvider) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SocialMediaProvider(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SocialMediaProvider", str)
+	}
+	return nil
+}
+
+func (e SocialMediaProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

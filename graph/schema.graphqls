@@ -62,8 +62,34 @@ input NewPost {
   tags: [String]
 }
 
-# AUTHOR MANAGEMENT
+# ACCOUNT MANAGEMENT
+enum SocialMediaProvider {
+  LINKEDIN
+  TWITTER
+  FACEBOOK
+  REDDIT
+  STACKOVERFLOW
+}
+type SocialMediaAccount {
+  id: ID!
+  provider: SocialMediaProvider!
+  providerID: String!
+  providerUsername: String!
+  providerToken: String!
+} 
 
+union Account = SocialMediaAccount
+
+input NewAccount {
+  id: String
+  provider: String!
+  providerID: String!
+  providerUsername: String!
+  providerToken: String!
+}
+
+
+# QUERIES______________________
 type Query {
   # Article Queries
   article(id:ID!): Article
@@ -76,8 +102,14 @@ type Query {
   # Post Queries
   post(id:ID!): Post
   posts: [Post!]!
+
+  # Account queries
+  account(id:ID!): Account
+  accounts: [Account!]!
+  accountsByProvider(provider: String): [Account!]!  
 }
 
+# MUTATIONS_____________________
 type Mutation {
   # Article
   createArticle(input: NewArticle!): Article!
@@ -86,5 +118,8 @@ type Mutation {
   createBlog(input: NewBlog!): Blog!
 
   # Post
-  createPost(input: NewPost!) : Post!
+  createPost(input: NewPost!): Post!
+
+  # Account
+  createAccount(input: NewAccount): Account!
 }
