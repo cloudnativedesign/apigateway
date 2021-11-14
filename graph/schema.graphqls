@@ -1,0 +1,69 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+
+
+type Query {
+  # Article Queries
+  article(id:ID!): Article
+  articles: [Article!]!
+
+  # Blog Queries
+  blog(id:ID!): Blog
+  blogs: [Blog!]!
+}
+
+type Mutation {
+  # Article
+  createArticle(input: NewArticle!): Article!
+  
+  # Blog
+  createBlog(input: NewBlog!): Blog!
+}
+
+# Supporting Types
+type Tag {
+  name: String!
+  value: String!
+}
+type NewTag{
+  name: String!
+  value: String!
+}
+
+#  ARTICLE MANAGEMENT
+type Article {
+  id: ID!
+  title: String!
+  subtitle: String!
+  content: String!
+}
+
+input NewArticle {
+  id: String
+  title: String!
+  subtitle: String!
+  content: String!
+}
+
+# BLOG MANAGEMENT
+type Blog {
+  id: ID!
+  title: String!
+  subtitle: String!
+  content: String!
+  summary: String!
+  tags: [Tag]
+}
+
+input NewBlog {
+  id: String
+  title: String!
+  subtitle: String!
+  content: String!
+  summary: String
+}
+
+
+# AUTHOR MANAGEMENT
