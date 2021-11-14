@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/cloudnativedesign/apigateway/graph/generated"
 	"github.com/cloudnativedesign/apigateway/graph/model"
@@ -102,8 +103,37 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.NewPost) 
 	return &post, nil
 }
 
-func (r *mutationResolver) CreateAccount(ctx context.Context, input *model.NewAccount) (model.Account, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) CreateAccount(ctx context.Context, input *model.NewAccount) (*model.SocialMediaAccount, error) {
+	n := len(r.Resolver.AccountStore)
+	if n == 0 {
+		r.Resolver.AccountStore = make(map[string]model.SocialMediaAccount)
+	}
+
+	id := input.ID
+	provider := model.SocialMediaProvider(strings.ToUpper(input.Provider))
+	if !model.SocialMediaProvider.IsValid(provider) {
+		return nil, fmt.Errorf("social media provider not supported. Please check correct typing")
+	}
+	var account model.SocialMediaAccount
+	account.Provider = provider
+	account.ProviderID = input.ProviderID
+	account.ProviderToken = input.ProviderToken
+	account.ProviderUsername = input.ProviderUsername
+
+	if id != nil {
+		_, ok := r.Resolver.AccountStore[*id]
+		if !ok {
+			return nil, fmt.Errorf("not found")
+		}
+		r.Resolver.AccountStore[*id] = account
+
+	} else {
+		nid := strconv.Itoa(n + 1)
+		account.ID = nid
+		r.Resolver.AccountStore[nid] = account
+	}
+
+	return &account, nil
 }
 
 func (r *queryResolver) Article(ctx context.Context, id string) (*model.Article, error) {
@@ -157,16 +187,37 @@ func (r *queryResolver) Posts(ctx context.Context) ([]*model.Post, error) {
 	return posts, nil
 }
 
-func (r *queryResolver) Account(ctx context.Context, id string) (model.Account, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Account(ctx context.Context, id string) (*model.SocialMediaAccount, error) {
+	account, ok := r.Resolver.AccountStore[id]
+	if !ok {
+		return nil, fmt.Errorf("not found")
+	}
+	return &account, nil
 }
 
-func (r *queryResolver) Accounts(ctx context.Context) ([]model.Account, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Accounts(ctx context.Context) ([]*model.SocialMediaAccount, error) {
+	accounts := make([]*model.SocialMediaAccount, 0)
+	for idx := range r.Resolver.AccountStore {
+		account := r.Resolver.AccountStore[idx]
+		accounts = append(accounts, &account)
+	}
+	return accounts, nil
 }
 
-func (r *queryResolver) AccountsByProvider(ctx context.Context, provider *string) ([]model.Account, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) AccountsByProvider(ctx context.Context, provider *string) ([]*model.SocialMediaAccount, error) {
+	accounts := make([]*model.SocialMediaAccount, 0)
+	setProvider := model.SocialMediaProvider(strings.ToUpper(*provider))
+
+	if !setProvider.IsValid() {
+		return nil, fmt.Errorf("provider not supported. Please check typging")
+	}
+	for idx := range r.Resolver.AccountStore {
+		account := r.Resolver.AccountStore[idx]
+		if account.Provider == setProvider {
+			accounts = append(accounts, &account)
+		}
+	}
+	return accounts, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

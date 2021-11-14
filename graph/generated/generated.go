@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -109,7 +108,7 @@ type MutationResolver interface {
 	CreateArticle(ctx context.Context, input model.NewArticle) (*model.Article, error)
 	CreateBlog(ctx context.Context, input model.NewBlog) (*model.Blog, error)
 	CreatePost(ctx context.Context, input model.NewPost) (*model.Post, error)
-	CreateAccount(ctx context.Context, input *model.NewAccount) (model.Account, error)
+	CreateAccount(ctx context.Context, input *model.NewAccount) (*model.SocialMediaAccount, error)
 }
 type QueryResolver interface {
 	Article(ctx context.Context, id string) (*model.Article, error)
@@ -118,9 +117,9 @@ type QueryResolver interface {
 	Blogs(ctx context.Context) ([]*model.Blog, error)
 	Post(ctx context.Context, id string) (*model.Post, error)
 	Posts(ctx context.Context) ([]*model.Post, error)
-	Account(ctx context.Context, id string) (model.Account, error)
-	Accounts(ctx context.Context) ([]model.Account, error)
-	AccountsByProvider(ctx context.Context, provider *string) ([]model.Account, error)
+	Account(ctx context.Context, id string) (*model.SocialMediaAccount, error)
+	Accounts(ctx context.Context) ([]*model.SocialMediaAccount, error)
+	AccountsByProvider(ctx context.Context, provider *string) ([]*model.SocialMediaAccount, error)
 }
 
 type executableSchema struct {
@@ -571,6 +570,7 @@ enum SocialMediaProvider {
   REDDIT
   STACKOVERFLOW
 }
+
 type SocialMediaAccount {
   id: ID!
   provider: SocialMediaProvider!
@@ -578,8 +578,6 @@ type SocialMediaAccount {
   providerUsername: String!
   providerToken: String!
 } 
-
-union Account = SocialMediaAccount
 
 input NewAccount {
   id: String
@@ -605,9 +603,9 @@ type Query {
   posts: [Post!]!
 
   # Account queries
-  account(id:ID!): Account
-  accounts: [Account!]!
-  accountsByProvider(provider: String): [Account!]!  
+  account(id:ID!): SocialMediaAccount
+  accounts: [SocialMediaAccount!]!
+  accountsByProvider(provider: String): [SocialMediaAccount!]!  
 }
 
 # MUTATIONS_____________________
@@ -622,7 +620,7 @@ type Mutation {
   createPost(input: NewPost!): Post!
 
   # Account
-  createAccount(input: NewAccount): Account!
+  createAccount(input: NewAccount): SocialMediaAccount!
 }
 `, BuiltIn: false},
 }
@@ -1330,9 +1328,9 @@ func (ec *executionContext) _Mutation_createAccount(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.Account)
+	res := resTmp.(*model.SocialMediaAccount)
 	fc.Result = res
-	return ec.marshalNAccount2githubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐAccount(ctx, field.Selections, res)
+	return ec.marshalNSocialMediaAccount2ᚖgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _NewTag_name(ctx context.Context, field graphql.CollectedField, obj *model.NewTag) (ret graphql.Marshaler) {
@@ -1798,9 +1796,9 @@ func (ec *executionContext) _Query_account(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(model.Account)
+	res := resTmp.(*model.SocialMediaAccount)
 	fc.Result = res
-	return ec.marshalOAccount2githubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐAccount(ctx, field.Selections, res)
+	return ec.marshalOSocialMediaAccount2ᚖgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_accounts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1833,9 +1831,9 @@ func (ec *executionContext) _Query_accounts(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]model.Account)
+	res := resTmp.([]*model.SocialMediaAccount)
 	fc.Result = res
-	return ec.marshalNAccount2ᚕgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐAccountᚄ(ctx, field.Selections, res)
+	return ec.marshalNSocialMediaAccount2ᚕᚖgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaAccountᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_accountsByProvider(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1875,9 +1873,9 @@ func (ec *executionContext) _Query_accountsByProvider(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]model.Account)
+	res := resTmp.([]*model.SocialMediaAccount)
 	fc.Result = res
-	return ec.marshalNAccount2ᚕgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐAccountᚄ(ctx, field.Selections, res)
+	return ec.marshalNSocialMediaAccount2ᚕᚖgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaAccountᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3526,22 +3524,6 @@ func (ec *executionContext) unmarshalInputNewPost(ctx context.Context, obj inter
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _Account(ctx context.Context, sel ast.SelectionSet, obj model.Account) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.SocialMediaAccount:
-		return ec._SocialMediaAccount(ctx, sel, &obj)
-	case *model.SocialMediaAccount:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._SocialMediaAccount(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -3898,7 +3880,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var socialMediaAccountImplementors = []string{"SocialMediaAccount", "Account"}
+var socialMediaAccountImplementors = []string{"SocialMediaAccount"}
 
 func (ec *executionContext) _SocialMediaAccount(ctx context.Context, sel ast.SelectionSet, obj *model.SocialMediaAccount) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, socialMediaAccountImplementors)
@@ -4227,60 +4209,6 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAccount2githubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐAccount(ctx context.Context, sel ast.SelectionSet, v model.Account) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Account(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNAccount2ᚕgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []model.Account) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNAccount2githubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐAccount(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
 func (ec *executionContext) marshalNArticle2githubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐArticle(ctx context.Context, sel ast.SelectionSet, v model.Article) graphql.Marshaler {
 	return ec._Article(ctx, sel, &v)
 }
@@ -4498,6 +4426,64 @@ func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋcloudnativedesignᚋa
 		return graphql.Null
 	}
 	return ec._Post(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSocialMediaAccount2githubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaAccount(ctx context.Context, sel ast.SelectionSet, v model.SocialMediaAccount) graphql.Marshaler {
+	return ec._SocialMediaAccount(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSocialMediaAccount2ᚕᚖgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SocialMediaAccount) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSocialMediaAccount2ᚖgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaAccount(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNSocialMediaAccount2ᚖgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaAccount(ctx context.Context, sel ast.SelectionSet, v *model.SocialMediaAccount) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SocialMediaAccount(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNSocialMediaProvider2githubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaProvider(ctx context.Context, v interface{}) (model.SocialMediaProvider, error) {
@@ -4818,13 +4804,6 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAccount2githubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐAccount(ctx context.Context, sel ast.SelectionSet, v model.Account) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Account(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOArticle2ᚖgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐArticle(ctx context.Context, sel ast.SelectionSet, v *model.Article) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -4876,6 +4855,13 @@ func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋcloudnativedesignᚋa
 		return graphql.Null
 	}
 	return ec._Post(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOSocialMediaAccount2ᚖgithubᚗcomᚋcloudnativedesignᚋapigatewayᚋgraphᚋmodelᚐSocialMediaAccount(ctx context.Context, sel ast.SelectionSet, v *model.SocialMediaAccount) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SocialMediaAccount(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

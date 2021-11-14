@@ -10,4 +10,5 @@ type Resolver struct {
 	ArticleStore map[string]model.Article
 	BlogStore    map[string]model.Blog
 	PostStore    map[string]model.Post
+	AccountStore map[string]model.SocialMediaAccount
 }

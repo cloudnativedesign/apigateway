@@ -70,6 +70,7 @@ enum SocialMediaProvider {
   REDDIT
   STACKOVERFLOW
 }
+
 type SocialMediaAccount {
   id: ID!
   provider: SocialMediaProvider!
@@ -77,8 +78,6 @@ type SocialMediaAccount {
   providerUsername: String!
   providerToken: String!
 } 
-
-union Account = SocialMediaAccount
 
 input NewAccount {
   id: String
@@ -104,9 +103,9 @@ type Query {
   posts: [Post!]!
 
   # Account queries
-  account(id:ID!): Account
-  accounts: [Account!]!
-  accountsByProvider(provider: String): [Account!]!  
+  account(id:ID!): SocialMediaAccount
+  accounts: [SocialMediaAccount!]!
+  accountsByProvider(provider: String): [SocialMediaAccount!]!  
 }
 
 # MUTATIONS_____________________
@@ -121,5 +120,5 @@ type Mutation {
   createPost(input: NewPost!): Post!
 
   # Account
-  createAccount(input: NewAccount): Account!
+  createAccount(input: NewAccount): SocialMediaAccount!
 }

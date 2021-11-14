@@ -8,7 +8,10 @@ It allows :
 * integrated queries across multiple providers
 * schema validation on item creation
 
-## Service configuration
+## Service usage
+### Setting up the service
+Download the repository code, initiate the required go module dependencies locally and start the server to set up your local development environment. 
+
 ```(shell)
 git clone https://github.com/cloudnativedesign/apigateway.git
 
@@ -16,6 +19,17 @@ go mod download
 
 go run server.go
 ```
+
+### Changing the schema
+Start by adapting the Types in `schema.graphqls` along with the required mutations and inputs.
+
+Then compile to generate the `model files` and the `resolver stumps`
+```shell
+go run github.com/99designs/gqlgen generate
+```
+
+Complete the code in `schema.resolver.go` with the custom logic to resolve the request to the abstracted microservice APIs using `gRPC` calls for internal resolution on service-to-service communication.
+
 
 ## Architecture
 The service implements the API gateway pattern to help us abstract the complex interactions across multiple backend microservices around a given POJO.

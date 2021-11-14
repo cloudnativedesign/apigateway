@@ -8,10 +8,6 @@ import (
 	"strconv"
 )
 
-type Account interface {
-	IsAccount()
-}
-
 type Article struct {
 	ID       string `json:"id"`
 	Title    string `json:"title"`
@@ -77,8 +73,6 @@ type SocialMediaAccount struct {
 	ProviderUsername string              `json:"providerUsername"`
 	ProviderToken    string              `json:"providerToken"`
 }
-
-func (SocialMediaAccount) IsAccount() {}
 
 type Tag struct {
 	Name  string `json:"name"`
