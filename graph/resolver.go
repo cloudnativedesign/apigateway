@@ -9,4 +9,5 @@ import "github.com/cloudnativedesign/apigateway/graph/model"
 type Resolver struct {
 	ArticleStore map[string]model.Article
 	BlogStore    map[string]model.Blog
+	PostStore    map[string]model.Post
 }

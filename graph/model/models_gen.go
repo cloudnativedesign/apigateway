@@ -33,9 +33,23 @@ type NewBlog struct {
 	Summary  *string `json:"summary"`
 }
 
+type NewPost struct {
+	ID      *string   `json:"id"`
+	Title   string    `json:"title"`
+	Content string    `json:"content"`
+	Tags    []*string `json:"tags"`
+}
+
 type NewTag struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+
+type Post struct {
+	ID      string   `json:"id"`
+	Title   *string  `json:"title"`
+	Content string   `json:"content"`
+	Tags    []string `json:"tags"`
 }
 
 type Tag struct {

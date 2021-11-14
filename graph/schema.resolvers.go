@@ -67,10 +67,45 @@ func (r *mutationResolver) CreateBlog(ctx context.Context, input model.NewBlog) 
 	return &blog, nil
 }
 
+func (r *mutationResolver) CreatePost(ctx context.Context, input model.NewPost) (*model.Post, error) {
+	n := len(r.Resolver.PostStore)
+	if n == 0 {
+		r.Resolver.PostStore = make(map[string]model.Post)
+	}
+
+	id := input.ID
+	var tagString string
+	var post model.Post
+	post.Title = &input.Title
+
+	// Appends all tags into concatenable strings
+	for _, tag := range input.Tags {
+		tagString = tagString + " #" + *tag
+	}
+
+	// Define the post object
+
+	post.Content = input.Content + " " + tagString
+
+	if id != nil {
+		_, ok := r.PostStore[*id]
+		if !ok {
+			return nil, fmt.Errorf("not found")
+		}
+		r.Resolver.PostStore[*id] = post
+	} else {
+		nid := strconv.Itoa(n + 1)
+		post.ID = nid
+		r.Resolver.PostStore[nid] = post
+	}
+
+	return &post, nil
+}
+
 func (r *queryResolver) Article(ctx context.Context, id string) (*model.Article, error) {
 	article, ok := r.Resolver.ArticleStore[id]
 	if !ok {
-		return nil, fmt.Errorf("Not found")
+		return nil, fmt.Errorf("not found")
 	}
 	return &article, nil
 }
@@ -99,6 +134,23 @@ func (r *queryResolver) Blogs(ctx context.Context) ([]*model.Blog, error) {
 		blogs = append(blogs, &blog)
 	}
 	return blogs, nil
+}
+
+func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error) {
+	post, ok := r.Resolver.PostStore[id]
+	if !ok {
+		return nil, fmt.Errorf("not found")
+	}
+	return &post, nil
+}
+
+func (r *queryResolver) Posts(ctx context.Context) ([]*model.Post, error) {
+	posts := make([]*model.Post, 0)
+	for idx := range r.Resolver.PostStore {
+		post := r.Resolver.PostStore[idx]
+		posts = append(posts, &post)
+	}
+	return posts, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
