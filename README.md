@@ -1,6 +1,13 @@
 # apigateway
 API Gateway service provides a unified web backend API across all cloudnativedesign microservices for both web and mobile clients using a GraphQL API
 
+It allows :
+* schema first design of the API
+* effective migration managment for iterative design
+* optimized caching of the response objects 
+* integrated queries across multiple providers
+* schema validation on item creation
+
 ## Service configuration
 ```(shell)
 git clone https://github.com/cloudnativedesign/apigateway.git
